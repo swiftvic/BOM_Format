@@ -3,13 +3,13 @@
 import openpyxl
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
 
-headers = ["Level", "Customer Part Number", "Qty", "Ref Des", "Item Rev", "Mara #", "Mara Description", "Cust MFR", " Cust MPN", "Cust Notes", "Higher Level", "Ext Qty"]
+headers = ["Level", "Customer Part Number", "Qty", "Ref Des", "Item Rev", "Mara #", "Mara Description", "Cust MFR", "Cust MPN", "Cust Notes", "Higher Level", "Ext Qty"]
 
 # Styling for headers
 font_headers = Font(name = 'Arial', size = 10, bold = True)
 
 # Column map from CustBOM
-cust_bom_col = [1, 2, 14, 17, 4, 25, 26, 18]
+cust_bom_ref = {"Level": 1, "Number": 2, "BOM.Qty": 15, "BOM.Ref": 18, "Rev": 11, "Description": 4, "Manufacturers.MFR Name": 26, "Manufacturers.MPN": 27}
 
 def main():
 
@@ -50,15 +50,14 @@ def main():
     # Adding headers into new sheet
     col = 1
     for item in headers:
-        mara_format.cell(2, col).value = item
-        mara_format.cell(2, col).font = font_headers
+        mara_format.cell(2, col).value = item                                                           # Copies each header into each cell
+        mara_format.cell(2, col).font = font_headers                                                    # Setting the styling of each header
         col += 1
 
     # Copying various customer columns (ref cust_bom_col variable at top) over to Mara new sheet
     m_col = 1                                                                                           # Start col 1 of new sheet
-    for cust_col in cust_bom_col:                                                                       # Loop through each item in cust_bom_col
-        m_row = 3                                                                                       # Start row 3 of new sheet and reset to 3 after each column is copied
-        print("Copying column " + str(cust_col))                                                                                        
+    for cust_col in cust_bom_ref.values():                                                              # Loop through each item in cust_bom_ref and use it's values
+        m_row = 3                                                                                       # Start row 3 of new sheet and reset to 3 after each column is copied                                                                                     
         for cust_row in range(3, max_row):                                                              # Loop through each row in cust sheet until end         
             mara_format.cell(m_row, m_col).value = cust_sheet.cell(cust_row, cust_col).value            # Copy cells from cust sheet cell to mara format cell
             m_row += 1                                                                                  # Increase to new row of new sheet
@@ -66,16 +65,21 @@ def main():
         if m_col == 6 or m_col == 11:                                                                   # Skip col 6 and 11 of new sheet
             m_col += 1                                                                                  
 
- 
-    
-
-    #for row in range(3, max_row):
-    #    mara_format.cell()
+    # Adjust columns to length of cell values
+    for col in mara_format.columns:
+        max_length = 0
+        column = col[0].column                                                                          # Gets the Column letter/name
+        for cell in col:
+            try:                                                                                        # Avoid error on an empty cell
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = (max_length + 1)
+        mara_format.column_dimensions[column].width = adjusted_width
 
     # Saves changes
     wb_old.save(filepath_old)
-
-
 
 if __name__ == '__main__':
     main()
