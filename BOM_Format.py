@@ -56,7 +56,7 @@ def main():
 
     # Copying various customer columns (ref cust_bom_col variable at top) over to Mara new sheet
     m_col = 1                                                                                           # Start col 1 of new sheet
-    for cust_col in cust_bom_ref.values():                                                              # Loop through each item in cust_bom_ref and use it's values
+    for cust_col in cust_bom_ref.values():                                                              # Loop through each item in cust_bom_ref dict and use it's values
         m_row = 3                                                                                       # Start row 3 of new sheet and reset to 3 after each column is copied                                                                                     
         for cust_row in range(3, max_row):                                                              # Loop through each row in cust sheet until end         
             mara_format.cell(m_row, m_col).value = cust_sheet.cell(cust_row, cust_col).value            # Copy cells from cust sheet cell to mara format cell
@@ -77,6 +77,30 @@ def main():
                 pass
         adjusted_width = (max_length + 1)
         mara_format.column_dimensions[column].width = adjusted_width
+
+    # Insert Higher Level
+    level_ref = {}                                                                                      # Dict to hold level number ref part number
+    col = 1                                                                                             # BOM level typically on column 1
+    for row in range(2, max_row):                                                                       # Loop through each row of CustBOM
+        try:                                                                                            # Avoid error on an empty cell
+            current_level = int(cust_sheet.cell(row, col).value)                                        # Store the BOM level an int in variable current_level
+            #if current_level == 0 or current_level == 1:
+            level_ref[current_level] = cust_sheet.cell(row, col + 1).value                              # Store in dict "current_level : part number"
+        except:                                                                                         # Just pass through if any error
+            pass
+    
+    higher_lvl_col = 11                                                                                 # Mara formatted sheet column "Higher Level"
+    col = 1                                                                                             # BOM level typically on column 1
+    for row in range(3, max_new_row):
+        try: 
+            bom_level = int(mara_format.cell(row, col).value)
+            if bom_level >= 1:                                                                          # If the Line item BOM level is >= 1
+                mara_format.cell(row, higher_lvl_col).value = level_ref[bom_level - 1]                  # Ref level_ref dict for one BOM level higher
+        except:
+            pass 
+
+    def comparison():
+        pass
 
     # Saves changes
     wb_old.save(filepath_old)
