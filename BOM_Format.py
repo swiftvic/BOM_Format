@@ -99,8 +99,16 @@ def main():
         except:
             pass 
 
-    def comparison():
-        pass
+    def check_qty(qty, ref_des):
+        '''
+        Input: qty, ref_des (str) \n
+        Output: qty, num_ref_des, boolean qty == num_ref_des
+        '''
+        qty = int(qty)
+        ref_des_split = ref_des.split(",")
+        num_ref_des = len(ref_des_split)
+
+        return (qty, num_ref_des, qty == num_ref_des)
 
     # Saves changes
     wb_old.save(filepath_old)
