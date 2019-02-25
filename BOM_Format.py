@@ -114,16 +114,18 @@ def main():
     # Saves changes
     wb_old.save(filepath_old)
 
-pattern_ranges = '([A-Z]+)([0-9]+)-[A-Z]+([0-9]+)'
-
 def remove_ws(phrase):
     '''Returns all whitespaces removed in phrase'''
     
     return phrase.replace(" ", "")
 
-def regex_ranges(string):
-    pattern = '([A-Z]+)([0-9]+)-[A-Z]+([0-9]+)'                     # Regex formula to pull first Designator plus numerical range with "-"" in the middle.
-    
+def regex_ranges(string, pattern = '([A-Z]+)([0-9]+)-[A-Z]+([0-9]+)'):
+    """
+    Takes in a string and regex pattern. Returns list of tuples with designators and start/end range.
+    Default regex pattern: '([A-Z]+)([0-9]+)-[A-Z]+([0-9]+)'
+    Return: [('R','2','5'),('CR','10','12')]
+    """
+    # Default pattern: Regex formula to pull first Designator plus numerical range with "-"" in the middle.
     return re.findall(pattern, string)
 
 def sorted_nicely(l):
@@ -138,6 +140,10 @@ def sorted_nicely(l):
     return sorted(l, key = alphanum_key)
 
 def unpack_des(phrase):
+    """
+    Takes in "phrase" in str form, unpacks designators and returns it unpacked in string form.
+    Phrase should contain a "-". ie. "R20, R1-R5, R9, CR1-CR4, CR8, R10-R15, CR9-CR11, MAR3-MAR5, MAR1"
+    """
     
     # Variables
     breakdown_phrase = []                   # List to hold the phrase broken down into a list
