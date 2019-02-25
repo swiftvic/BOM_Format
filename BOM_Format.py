@@ -139,52 +139,40 @@ def sorted_nicely(l):
 
 def unpack_des(phrase):
     
-    breakdown_phrase = []
-    extracted_ranges = []
-    extracted_des = []
-    unpacked_list = []
-    
+    # Variables
+    breakdown_phrase = []                   # List to hold the phrase broken down into a list
+    designators = ''                        # Variable to hold a string of unpacked and sorted designators
+    unpacked_list = []                      # Initiate variable to hold all unpacked designator char + number
+
     clean_phrase = remove_ws(phrase)                                   # Removes all whitespace from phrase
     
     breakdown_phrase = clean_phrase.replace('-',',').split(',')        # Takes phrase, replace '-' w/ ',' then split using ',' Need this for union of two lists later.
   
     extracted_tuples = regex_ranges(clean_phrase)                      # Uses regex pattern to pull all ranges from phrase
+
+     # Loops through each set of tuples of extracted designators and ranges
+    for range_set in extracted_tuples:                                
+        # Grabs start[1] and end[2] + 1 ranges from each tuple set, concatenates designator char with number and appends to list
+        # Unpacked_list adds to itself or else each loop iteration of a tuple set will erase the variable
+        unpacked_list += [range_set[0] + str(des_num) for des_num in range(int(range_set[1]), int(range_set[2]) + 1)]
     
-    extracted_des = [des_char[0] for des_char in extracted_tuples]     # Extracts Ref des chars from previous regex and puts them into a list
-    
-    for des_range in extracted_tuples:                                 # Loops through extracted regex list 
-        extracted_ranges.append(int(des_range[1]))                     # Appends first range number, converts to int into list
-        extracted_ranges.append(int(des_range[2]))                     # Appends second range number, converts to int into list
+    '''
+    for range_set in extracted_tuples:                                      # Loops through each set of tuples of extracted designators and ranges
+        for des_num in range(int(range_set[1]), int(range_set[2]) + 1):     # Grabs start[1] and end[2] + 1 ranges from each tuple set
+            unpacked_list.append(range_set[0] + str(des_num))               # Concatenates designator char with number and appends to list
+    '''
+    repacked_list = list(set(unpacked_list).union(set(breakdown_phrase)))    # Takes unpacked_list and combines with single designators list
 
-    s = ''                # Variable for combined string of des char with des number
-    n = 0                 # Counter for number of items in extracted ranges list
-    i = 0                 # 
-    j = 1
-    k = 0
-    designators = ''
+    sorted_repacked_list = sorted_nicely(repacked_list)                      # Sorts list alphanumerically using "sorted_nicely" function
 
-    while n < len(extracted_ranges) / 2:
-        for x in range(extracted_ranges[i],extracted_ranges[j] + 1):
-            s = extracted_des[k] + str(x)                                 # Concats des char with des number
-            unpacked_list.append(s)                                       # Appends above string to a list
-            
-        i += 2
-        j += 2
-        k += 1
-        n += 1
-
-    repacked_list = list(set(unpacked_list).union(set(breakdown_phrase)))    # Takes unpacked_list and combines with single des list
-
-    sorted_repacked_list = sorted_nicely(repacked_list)
-    
-    for items in sorted_repacked_list:
+    for items in sorted_repacked_list:        # Turns list back into a string with commas in between each designator
         designators += items + ','
     
-    print(designators.strip(","))    # Strips last , at the end of string
-    
-    #return extracted_tuples
+    #print(designators.strip(","))    # Strips last "," at the end of string
+    return designators.strip(",")     # Strips last "," at the end of string and returns string
 
 if __name__ == '__main__':
     #main()
 
-    unpack_des("R20, R1-R5, R9, CR1-CR4, CR8, R10-R15, CR9-CR11, MAR3-MAR5, MAR1")
+    new_des = unpack_des("R20, R1-R5, R9, CR1-CR4, CR8, R10-R15, CR9-CR11, MAR3-MAR5, MAR1")
+    print(new_des)
