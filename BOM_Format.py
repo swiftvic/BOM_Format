@@ -155,12 +155,7 @@ def unpack_des(phrase):
         # Grabs start[1] and end[2] + 1 ranges from each tuple set, concatenates designator char with number and appends to list
         # Unpacked_list adds to itself or else each loop iteration of a tuple set will erase the variable
         unpacked_list += [range_set[0] + str(des_num) for des_num in range(int(range_set[1]), int(range_set[2]) + 1)]
-    
-    '''
-    for range_set in extracted_tuples:                                      # Loops through each set of tuples of extracted designators and ranges
-        for des_num in range(int(range_set[1]), int(range_set[2]) + 1):     # Grabs start[1] and end[2] + 1 ranges from each tuple set
-            unpacked_list.append(range_set[0] + str(des_num))               # Concatenates designator char with number and appends to list
-    '''
+ 
     repacked_list = list(set(unpacked_list).union(set(breakdown_phrase)))    # Takes unpacked_list and combines with single designators list
 
     sorted_repacked_list = sorted_nicely(repacked_list)                      # Sorts list alphanumerically using "sorted_nicely" function
