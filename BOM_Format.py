@@ -1,6 +1,7 @@
 # BOM formating 
 # Original BOM 9010242321 now 123240109
 import openpyxl
+import re                                                                                     # Regular Expressions library
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
 
 headers = ["Level", "Customer Part Number", "Qty", "Ref Des", "Item Rev", "Mara #", "Mara Description", "Cust MFR", "Cust MPN", "Cust Notes", "Higher Level", "Ext Qty"]
@@ -109,10 +110,81 @@ def main():
         num_ref_des = len(ref_des_split)
 
         return (qty, num_ref_des, qty == num_ref_des)
-
-    #test cha
+ 
     # Saves changes
     wb_old.save(filepath_old)
 
+pattern_ranges = '([A-Z]+)([0-9]+)-[A-Z]+([0-9]+)'
+
+def remove_ws(phrase):
+    '''Returns all whitespaces removed in phrase'''
+    
+    return phrase.replace(" ", "")
+
+def regex_ranges(string):
+    pattern = '([A-Z]+)([0-9]+)-[A-Z]+([0-9]+)'                     # Regex formula to pull first Designator plus numerical range with "-"" in the middle.
+    
+    return re.findall(pattern, string)
+
+def sorted_nicely(l):
+    """ Sorts the given iterable in the way that is expected.
+ 
+    Required arguments:
+    l -- The iterable to be sorted.
+ 
+    """
+    convert = lambda text: int(text) if text.isdigit() else text
+    alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
+    return sorted(l, key = alphanum_key)
+
+def unpack_des(phrase):
+    
+    breakdown_phrase = []
+    extracted_ranges = []
+    extracted_des = []
+    unpacked_list = []
+    
+    clean_phrase = remove_ws(phrase)                                   # Removes all whitespace from phrase
+    
+    breakdown_phrase = clean_phrase.replace('-',',').split(',')        # Takes phrase, replace '-' w/ ',' then split using ',' Need this for union of two lists later.
+  
+    extracted_tuples = regex_ranges(clean_phrase)                      # Uses regex pattern to pull all ranges from phrase
+    
+    extracted_des = [des_char[0] for des_char in extracted_tuples]     # Extracts Ref des chars from previous regex and puts them into a list
+    
+    for des_range in extracted_tuples:                                 # Loops through extracted regex list 
+        extracted_ranges.append(int(des_range[1]))                     # Appends first range number, converts to int into list
+        extracted_ranges.append(int(des_range[2]))                     # Appends second range number, converts to int into list
+
+    s = ''                # Variable for combined string of des char with des number
+    n = 0                 # Counter for number of items in extracted ranges list
+    i = 0                 # 
+    j = 1
+    k = 0
+    designators = ''
+
+    while n < len(extracted_ranges) / 2:
+        for x in range(extracted_ranges[i],extracted_ranges[j] + 1):
+            s = extracted_des[k] + str(x)                                 # Concats des char with des number
+            unpacked_list.append(s)                                       # Appends above string to a list
+            
+        i += 2
+        j += 2
+        k += 1
+        n += 1
+
+    repacked_list = list(set(unpacked_list).union(set(breakdown_phrase)))    # Takes unpacked_list and combines with single des list
+
+    sorted_repacked_list = sorted_nicely(repacked_list)
+    
+    for items in sorted_repacked_list:
+        designators += items + ','
+    
+    print(designators.strip(","))    # Strips last , at the end of string
+    
+    #return extracted_tuples
+
 if __name__ == '__main__':
-    main()
+    #main()
+
+    unpack_des("R20, R1-R5, R9, CR1-CR4, CR8, R10-R15, CR9-CR11, MAR3-MAR5, MAR1")
